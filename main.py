@@ -24,7 +24,10 @@ def make_options() -> ChromiumOptions:
         "--no-default-browser-check",
         "--disable-blink-features=AutomationControlled",
         "--disable-infobars",
-        "--start-maximized",
+        # Xvfb không có window manager nên --start-maximized không resize được (bị ignore),
+        # và nếu để chung với --window-size thì Chrome tự co nhỏ lại (2 cờ xung đột) -> chỉ dùng window-size.
+        "--window-size=1920,1080",
+        "--window-position=0,0",
         "--force-color-profile=srgb",
         "--metrics-recording-only",
         "--password-store=basic",
@@ -72,14 +75,38 @@ def fetch(url: str):
             if not ok:
                 raise HTTPException(status_code=502, detail="Cloudflare bypass failed")
 
+        av = ""
+        fb_user = ""
+        fb_dtsg = ""
+
+        try:
+            # driver.listen.start("facebook.com/api/graphql/")
+            page.listen.start()
+            for packet in driver.listen.steps():
+                if "https://www.facebook.com/api/graphql/" in packet.request.url:
+                    post_data = packet.request.postData
+                    data = dict(urllib.parse.parse_qsl(post_data))
+                    av = data.get("av", "")
+                    fb_user = data.get("__user", "")
+                    fb_dtsg = data.get("fb_dtsg", "")
+                    if av and fb_user and fb_dtsg:
+                        break
+
+        except Exception as e:
+            print(e)
+
         return {
-            "status": "ok 1",
+            "status": "ok",
             "title": page.title,
-            "html": page.html,
+            "av": av,
+            "fb_user": fb_user,
+            "fb_dtsg": fb_dtsg,
+            "cookies": {item["name"]: item["value"] for item in page.cookies()},
         }
     finally:
-        pass
-        # page.quit()
+        # time.sleep(10)
+        page.listen.stop()
+        page.quit()
 
 
 @app.get("/health")

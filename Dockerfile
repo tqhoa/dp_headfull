@@ -64,6 +64,9 @@ COPY --chown=appuser:appuser . .
 COPY --chown=appuser:appuser entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
+# ---- noVNC: vào thẳng "/" là auto-connect + auto-scale full khung, khỏi gõ query param tay ----
+COPY novnc-index.html /usr/share/novnc/index.html
+
 USER appuser
 
 ENTRYPOINT ["/entrypoint.sh"]
