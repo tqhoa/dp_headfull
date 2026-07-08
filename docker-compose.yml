@@ -1,0 +1,58 @@
+networks:
+  scraper-net:
+    driver: bridge
+
+services:
+  # ---- Tier 1: nhẹ, dùng requests_go (TLS/JA3 fingerprint), không cần Chrome ----
+  scraper-light:
+    build:
+      context: .
+      dockerfile: Dockerfile.light
+    container_name: scraper-light
+    environment:
+      - PROXY_URL=${PROXY_URL:-}
+    ports:
+      - "8070:8000"
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+    networks:
+      - scraper-net
+
+  # ---- Tier 2: nặng, DrissionPage headful qua Xvfb + Chrome thật ----
+  scraper-heavy:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: scraper-heavy
+    environment:
+      - PROXY_URL=${PROXY_URL:-}
+      - DISPLAY=:99
+      - VNC_ENABLED=${VNC_ENABLED:-0}
+      - VNC_PASSWORD=${VNC_PASSWORD:-}
+    ports:
+      - "8071:8000"
+      # Bật debug: set VNC_ENABLED=1 trước khi up, rồi connect VNC client vào localhost:5900
+      - "127.0.0.1:5900:5900"
+      # ...hoặc xem qua browser: http://localhost:6080/vnc.html (noVNC, không cần VNC client)
+      - "127.0.0.1:${NOVNC_PORT:-6080}:6080"
+    restart: unless-stopped
+    # Chrome cần shm lớn hơn default 64MB, không thì hay bị crash/renderer timeout
+    shm_size: "2gb"
+    # Cần thiết cho Chrome sandbox chạy ổn định trong container
+    security_opt:
+      - seccomp:unconfined
+    cap_add:
+      - SYS_ADMIN
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2G
+    networks:
+      - scraper-net
+
+  # ---- Debug: VNC_ENABLED=1 để bật x11vnc, xem Chrome render gì lúc bypass fail (localhost:5900) ----

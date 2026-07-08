@@ -1,0 +1,16 @@
+FROM python:3.11-slim-bookworm
+
+ENV PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+
+COPY requirements-light.txt .
+RUN pip install --no-cache-dir -r requirements-light.txt
+
+COPY --chown=appuser:appuser . .
+
+USER appuser
+
+CMD ["uvicorn", "main_light:app", "--host", "0.0.0.0", "--port", "8000"]
