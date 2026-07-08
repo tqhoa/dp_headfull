@@ -49,7 +49,7 @@ RUN wget -q -O /tmp/chrome.deb https://dl.google.com/linux/direct/google-chrome-
 
 # ---- User không phải root (Chrome + sandbox khuyến nghị không chạy root) ----
 RUN groupadd -r appuser && useradd -r -g appuser -m -d /home/appuser appuser \
-    && mkdir -p /app /home/appuser/.cache \
+    && mkdir -p /app /home/appuser/.cache /home/appuser/.chrome-profile \
     && chown -R appuser:appuser /app /home/appuser
 
 WORKDIR /app

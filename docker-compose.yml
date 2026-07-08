@@ -2,6 +2,9 @@ networks:
   scraper-net:
     driver: bridge
 
+volumes:
+  chrome-profile:
+
 services:
   # ---- Tier 1: nhẹ, dùng requests_go (TLS/JA3 fingerprint), không cần Chrome ----
   scraper-light:
@@ -37,6 +40,8 @@ services:
       - VNC_PASSWORD=${VNC_PASSWORD:-}
     volumes:
       - ./:/app/
+      # Profile Chrome (cookie/session login) sống ngoài container, không mất khi rebuild/restart
+      - ./chrome-profile:/home/appuser/.chrome-profile
     ports:
       - "8071:8000"
       # Bật debug: set VNC_ENABLED=1 trước khi up, rồi connect VNC client vào localhost:5900

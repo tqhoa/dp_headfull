@@ -13,6 +13,8 @@ app = FastAPI()
 def make_options() -> ChromiumOptions:
     options = ChromiumOptions()
     options.set_paths(browser_path="/usr/bin/google-chrome")
+    # Profile riêng, mount volume ngoài để giữ cookie/session (login FB...) qua các lần restart container
+    options.set_user_data_path("/home/appuser/.chrome-profile")
 
     # QUAN TRỌNG: không bật headless(True) — Cloudflare check headless rất gắt.
     # Ta chạy "headful" thật nhưng bên trong Xvfb (ảo) nên không cần GUI thật.
@@ -104,9 +106,10 @@ def fetch(url: str):
             "cookies": {item["name"]: item["value"] for item in page.cookies()},
         }
     finally:
+        pass
         # time.sleep(10)
-        page.listen.stop()
-        page.quit()
+        # page.listen.stop()
+        # page.quit()
 
 
 @app.get("/health")
