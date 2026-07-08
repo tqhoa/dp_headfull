@@ -2,6 +2,7 @@
 Tier 1 scraper: requests_go với TLS/JA3 fingerprint giả Chrome thật.
 Nhẹ, nhanh, dùng trước — chỉ fallback sang tier 2 (DrissionPage) khi bị 403/challenge.
 """
+
 import requests_go as requests
 from requests_go.tls_config import TLS_CHROME_LATEST
 from fastapi import FastAPI

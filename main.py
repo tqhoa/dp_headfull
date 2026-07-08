@@ -73,12 +73,13 @@ def fetch(url: str):
                 raise HTTPException(status_code=502, detail="Cloudflare bypass failed")
 
         return {
-            "status": "ok",
+            "status": "ok 1",
             "title": page.title,
             "html": page.html,
         }
     finally:
-        page.quit()
+        pass
+        # page.quit()
 
 
 @app.get("/health")
