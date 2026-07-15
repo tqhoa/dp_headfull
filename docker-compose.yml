@@ -65,3 +65,22 @@ services:
       - scraper-net
 
   # ---- Debug: VNC_ENABLED=1 để bật x11vnc, xem Chrome render gì lúc bypass fail (localhost:5900) ----
+
+  # ---- Tier 3: Playwright headless, chỉ lấy FB numeric ID (userID/pageID) từ HTML ----
+  scraper-uuid:
+    build:
+      context: .
+      dockerfile: Dockerfile.uuid
+    container_name: scraper-uuid
+    ports:
+      - "8072:8000"
+    restart: unless-stopped
+    volumes:
+      - ./:/app/
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+    networks:
+      - scraper-net

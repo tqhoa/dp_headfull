@@ -1,0 +1,4 @@
+chrome-profile/
+.git/
+__pycache__/
+*.pyc
